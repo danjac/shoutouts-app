@@ -31,9 +31,17 @@ def main(global_config, **settings):
         debug=False,
     )
 
+    app_coffee = Bundle(
+        'assets/app/coffee/*.coffee',
+        filters='coffeescript,uglifyjs',
+        output='js/app.js',
+        debug=False,
+    )
+
     config.add_webasset('bootstrap_css', bootstrap_css)
     config.add_webasset('bootstrap_js', bootstrap_js)
     config.add_webasset('jquery_js', jquery_js)
+    config.add_webasset('app_coffee', app_coffee)
 
     # integrate webassets with jinja2
 

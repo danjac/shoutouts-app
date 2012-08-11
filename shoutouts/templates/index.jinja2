@@ -3,58 +3,46 @@
 
 {% block content %}
 
+<div class="alert alert-block alert-error fade in" style="display:none;" id="alert-errors">
+    <button class="close" data-dismiss="alert" type="button">×</button>
+    <h4 class="alert-heading" id="alert-errors-heading"></h4>
+    <p id="alert-errors-description"></p>
+</div>
+
+
 <ul class="nav nav-tabs">
     <li class="active">
-        <a href="#">My priorities</a>
+        <a href="#" data-tab-id="priorities">My priorities</a>
     </li>
     <li>
-        <a href="#">Sales</a>
+        <a href="#" data-tab-id="sales">Sales</a>
     </li>
     <li>
-        <a href="#">Accounts</a>
+        <a href="#" data-tab-id="accounts">Accounts</a>
     </li>
     <li>
-        <a href="#">RDU</a>
+        <a href="#" data-tab-id="rdu">RDU</a>
     </li>
 </ul>
 
-<div class="alert alert-block alert-error fade in" style="display:none;" id="form-errors-alert">
-    <button class="close" data-dismiss="alert" type="button">×</button>
-    <h4 class="alert-heading">Your priorities needs some work!</h4>
-    <p>
-        Your form contains errors. Please check and submit again.
-    </p>
+<div id="priorities" class="tab-content">
+    {% include "priorities_form.jinja2" %}
 </div>
 
-<form method="POST" id="submit-form" action="{{ request.route_url('submit') }}">
-    {% include "priorities_form.jinja2" %}
-</form>
+<div id="sales" class="tab-content" style="display:none;">
+Sales goes here
+</div>
+
+<div id="accounts" class="tab-content" style="display:none;">
+Accounts goes here
+</div>
+
+<div id="rdu" class="tab-content" style="display:none;">
+RDU goes here
+</div>
+
 
 {% endblock %}
 
-{% block extra_js %}
-<script>
-    $(document).ready(function(){
-        $('#submit-form').submit(function() {
-            var form = $(this);
-            var url = form.attr('action');
-            var params = form.serialize();
-
-            var callback = function(response){
-                console.log(response);
-                form.html(response.html);
-                if (!response.success){
-                    $('#form-errors-alert').show();
-                }
-            }
-
-            $.post(url, params, callback);
-            return false;
-        });
-    });
-
-    
-</script>
-{% endblock %}
 
 

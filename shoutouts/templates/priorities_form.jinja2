@@ -1,3 +1,5 @@
+<form method="POST" id="submit-form" action="{{ request.route_url('submit') }}">
+
    <div>Shoutout to {{ form.shoutout }} for {{ form.shoutout_reason }}</div>
    <div>My 1 % goes to {{ form.one_pc }} for {{ form.one_pc_reason }}</div>
 
@@ -13,3 +15,4 @@
    {{ form.complete(class="btn") }}
    {{ form.postpone(class="btn") }}
 
+</form>
