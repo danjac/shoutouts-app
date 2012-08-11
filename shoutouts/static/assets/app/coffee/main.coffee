@@ -28,11 +28,11 @@ jQuery ->
 
             $('#priorities').html data.html
 
-            if not response.success
+            if not data.success
                 App.showErrorMessage 'Your form contains errors', 'Please correct the errors and carry on'
 
 
-            $.post url, params, callback
-        
+        $.post url, params, callback
+    
         false
   
