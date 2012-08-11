@@ -1,0 +1,49 @@
+
+{% extends "layout.jinja2" %}
+
+{% block content %}
+
+<ul class="nav nav-tabs">
+    <li class="active">
+        <a href="#">My priorities</a>
+    </li>
+    <li>
+        <a href="#">Sales</a>
+    </li>
+    <li>
+        <a href="#">Accounts</a>
+    </li>
+    <li>
+        <a href="#">RDU</a>
+    </li>
+</ul>
+
+<form method="POST" id="submit-form" action="{{ request.route_url('submit') }}">
+    {% include "priorities_form.jinja2" %}
+</form>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function(){
+        $('#submit-form').submit(function() {
+            var form = $(this);
+            var url = form.attr('action');
+            var params = form.serialize();
+
+            var callback = function(response){
+                console.log(response);
+                form.html(response.html);
+            }
+
+            $.post(url, params, callback);
+            return false;
+        });
+    });
+
+    
+</script>
+{% endblock %}
+
+
