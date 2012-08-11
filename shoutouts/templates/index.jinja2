@@ -18,6 +18,14 @@
     </li>
 </ul>
 
+<div class="alert alert-block alert-error fade in" style="display:none;" id="form-errors-alert">
+    <button class="close" data-dismiss="alert" type="button">×</button>
+    <h4 class="alert-heading">Your priorities needs some work!</h4>
+    <p>
+        Your form contains errors. Please check and submit again.
+    </p>
+</div>
+
 <form method="POST" id="submit-form" action="{{ request.route_url('submit') }}">
     {% include "priorities_form.jinja2" %}
 </form>
@@ -35,6 +43,9 @@
             var callback = function(response){
                 console.log(response);
                 form.html(response.html);
+                if (!response.success){
+                    $('#form-errors-alert').show();
+                }
             }
 
             $.post(url, params, callback);
