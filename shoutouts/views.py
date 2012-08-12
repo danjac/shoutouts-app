@@ -1,6 +1,7 @@
 from pyramid.view import view_config
 from pyramid.renderers import render
 
+
 from .models import (
     Priorities,
     User
@@ -16,9 +17,34 @@ from .forms import (
 def main(request):
     return {'form' : PrioritiesForm()}
 
+@view_config(route_name='login',
+             request_method='GET',
+             renderer='login.jinja2')
+def login(request):
+    return {'form' : LoginForm(next=request.url)}
+
+
+@view_config(route_name='login',
+             request_method='POST',
+             renderer='login.jinja2')
+def do_login(request):
+
+    form = LoginForm(request.POST)
+
+    if form.validate():
+        
+        user = User.objects.authenticate(form.email.data, form.password.data)
+
+        if user:
+            headers = remember(request, str(user.id))
+            return HTTPFound(form.next.data, headers=headers)
+
+    return {'form' : form}
+
 
 @view_config(route_name='submit',
              renderer='json',
+             request_method='POST',
              xhr=True)
 def submit(request):
 
@@ -46,6 +72,7 @@ def submit(request):
 
         print form.errors
 
+    # re-render the form partial
     html = render('priorities_form.jinja2', {'form' : form}, request)
 
     return {'success' : is_valid, 'html' : html}
