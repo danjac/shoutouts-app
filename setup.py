@@ -12,6 +12,7 @@ requires = [
     'pyramid_webassets',
     'pyramid_jinja2',
     'cssmin',
+    'cryptacular',
     'mailer',
     'wtforms',
     'waitress',

@@ -3,6 +3,8 @@ import datetime
 from pyramid.security import Allow
 from pyramid.authentication import Authenticated
 
+from cryptacular.bcrypt import BCRYPTPasswordManager
+
 from mongoengine import (
     Document,
     StringField,
@@ -13,6 +15,8 @@ from mongoengine import (
 )
 
 from mongoengine.queryset import QuerySet
+
+_password_manager = BCRYPTPasswordManager()
 
 class Root(object):
     """
@@ -53,8 +57,11 @@ class User(Document):
     def name(self):
         return " ".join((self.first_name, self.last_name))
 
+    def set_password(self, password):
+        self.password = _password_manager.encode(password)
+
     def check_password(self, password):
-        return True
+        return _password_manager.check(self.password, password)
 
 
 class Priorities(Document):
