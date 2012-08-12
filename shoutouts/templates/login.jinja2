@@ -1,0 +1,23 @@
+{% extends "layout.jinja2" %}
+
+{% block content %}
+
+<form method="POST" action="{{ request.route_url('login') }}">
+    {{ form.next }}
+
+    <div class="control-group">
+    {{ form.email.label }}
+    {{ form.email }}
+    </div>
+
+    <div class="control-group">
+    {{ form.password.label }}
+    {{ form.password }}
+    </div>
+
+    <div class="form-actions">
+    {{ form.submit(class="btn") }}
+    </div>
+</form>
+
+{% endblock %}

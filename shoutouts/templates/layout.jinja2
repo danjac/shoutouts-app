@@ -48,6 +48,9 @@
               <li class="active"><a href="#">Home</a></li>
               <li><a href="#about">About</a></li>
               <li><a href="#contact">Contact</a></li>
+              {% if request.user %}
+              <li><a href="#">{{ request.user.name }}</a></li>
+              {% endif %}
             </ul>
           </div><!--/.nav-collapse -->
         </div>

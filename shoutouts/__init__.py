@@ -1,9 +1,43 @@
 from pyramid.config import Configurator
-from pyramid.security import unauthenticated_userid
+
+from pyramid.security import (
+    unauthenticated_userid,
+    Allow,
+    Deny,
+)
+
+from pyramid.authentication import (
+    AuthTktAuthenticationPolicy, 
+    Everyone, 
+    Authenticated
+)
+
+from pyramid.authorization import ACLAuthorizationPolicy
 
 from mongoengine import connect, ValidationError
 
 from .models import User
+
+
+class Root(object):
+
+    __acl__ = [(Allow, Authenticated, 'view')]
+
+    def __init__(self, request):
+        pass
+
+
+class AuthenticationPolicy(AuthTktAuthenticationPolicy):
+
+    def effective_principals(self, request):
+
+        principals = [Everyone]
+
+        if request.user:
+            principals.append(Authenticated)
+
+        return principals
+
 
 def get_user(request):
 
@@ -22,10 +56,16 @@ def main(global_config, **settings):
     # mongoengine
     connect(settings['db_name'])
 
-    config = Configurator(settings=settings)
+    config = Configurator(
+        settings=settings,
+        authentication_policy=AuthenticationPolicy('seekrit'),
+        authorization_policy=ACLAuthorizationPolicy(),
+    )
 
     # auth/auth
     config.set_request_property(get_user, 'user', reify=True)
+    config.set_default_permission('view')
+    config.set_root_factory(Root)
 
     # webassets
     config.include('shoutouts.assets')

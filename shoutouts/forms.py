@@ -1,6 +1,7 @@
 from wtforms import (
     Form,
     TextField,
+    HiddenField,
     PasswordField,
     SelectField,
     SubmitField,
@@ -93,6 +94,8 @@ class PrioritiesForm(Form):
 
 class LoginForm(Form):
 
+    next = HiddenField()
+
     email = TextField(
         u"Email address",
         (
@@ -107,5 +110,7 @@ class LoginForm(Form):
             validators.Required(),
         )
     )
+
+    submit = SubmitField("Login")
 
 

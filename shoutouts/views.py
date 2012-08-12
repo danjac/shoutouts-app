@@ -1,5 +1,7 @@
-from pyramid.view import view_config
+from pyramid.view import view_config, forbidden_view_config
+from pyramid.security import NO_PERMISSION_REQUIRED, remember
 from pyramid.renderers import render
+from pyramid.httpexceptions import HTTPFound
 
 
 from .models import (
@@ -19,13 +21,16 @@ def main(request):
 
 @view_config(route_name='login',
              request_method='GET',
+             permission=NO_PERMISSION_REQUIRED,
              renderer='login.jinja2')
+@forbidden_view_config(renderer='login.jinja2')
 def login(request):
     return {'form' : LoginForm(next=request.url)}
 
 
 @view_config(route_name='login',
              request_method='POST',
+             permission=NO_PERMISSION_REQUIRED,
              renderer='login.jinja2')
 def do_login(request):
 
@@ -49,16 +54,12 @@ def do_login(request):
 def submit(request):
 
     form = PrioritiesForm(request.POST)
-    # normally we'd get request.user here
-    user = User.objects.first()
-    print "user:", user
-
     is_valid = form.validate()
 
     if is_valid:
         
         priorities = Priorities(
-            owner=user,
+            owner=request.user,
             is_complete=bool(form.complete.data),
         )
         
@@ -66,6 +67,7 @@ def submit(request):
 
         print priorities.tasks
         print priorities.one_pc
+        print priorities.owner
         # priorities.save()
 
     else:
