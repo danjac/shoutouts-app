@@ -1,5 +1,5 @@
 from pyramid.view import view_config, forbidden_view_config
-from pyramid.security import NO_PERMISSION_REQUIRED, remember
+from pyramid.security import NO_PERMISSION_REQUIRED, remember, forget
 from pyramid.renderers import render
 from pyramid.httpexceptions import HTTPFound
 
@@ -17,7 +17,14 @@ from .forms import (
 @view_config(route_name='main', 
              renderer='index.jinja2')
 def main(request):
-    return {'form' : PrioritiesForm()}
+    return {'form' : PrioritiesForm(csrf_context=request)}
+
+@view_config(route_name='logout')
+def logout(request):
+
+    headers = forget(request)
+    return HTTPFound(request.route_url('main'), headers=headers)
+
 
 @view_config(route_name='login',
              request_method='GET',
@@ -25,7 +32,7 @@ def main(request):
              renderer='login.jinja2')
 @forbidden_view_config(renderer='login.jinja2')
 def login(request):
-    return {'form' : LoginForm(next=request.url)}
+    return {'form' : LoginForm(csrf_context=request, next=request.url)}
 
 
 @view_config(route_name='login',
@@ -34,7 +41,7 @@ def login(request):
              renderer='login.jinja2')
 def do_login(request):
 
-    form = LoginForm(request.POST)
+    form = LoginForm(request.POST, csrf_context=request)
 
     if form.validate():
         
@@ -44,8 +51,20 @@ def do_login(request):
             headers = remember(request, str(user.id))
             return HTTPFound(form.next.data, headers=headers)
 
+    else:
+        print "ERRORS:", form.errors
+
     return {'form' : form}
 
+
+@view_config(route_name="signup",
+             request_method="GET",
+             permission=NO_PERMISSION_REQUIRED,
+             renderer='signup.jinja2')
+def signup(request):
+    return {'form' : SignupForm(csrf_context=request)}
+
+    
 
 @view_config(route_name='submit',
              renderer='json',
@@ -53,7 +72,7 @@ def do_login(request):
              xhr=True)
 def submit(request):
 
-    form = PrioritiesForm(request.POST)
+    form = PrioritiesForm(request.POST, csrf_context=request)
     is_valid = form.validate()
 
     if is_valid:

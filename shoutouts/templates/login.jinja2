@@ -3,6 +3,7 @@
 {% block content %}
 
 <form method="POST" action="{{ request.route_url('login') }}">
+    {{ form.csrf_token }}
     {{ form.next }}
 
     <div class="control-group">

@@ -1,5 +1,4 @@
 from wtforms import (
-    Form,
     TextField,
     HiddenField,
     PasswordField,
@@ -12,7 +11,15 @@ from wtforms import (
     fields,
 )
 
+from wtforms.ext.csrf import SecureForm
+
 from .models import User
+
+class Form(SecureForm):
+
+   def generate_csrf_token(self, csrf_context):
+        return csrf_context.session.get_csrf_token()
+
 
 class QuerySetSelectField(fields.SelectFieldBase):
     widget = widgets.Select()

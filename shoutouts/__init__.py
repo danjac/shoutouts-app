@@ -2,6 +2,7 @@ from pyramid.config import Configurator
 from pyramid.authorization import ACLAuthorizationPolicy
 from pyramid.security import unauthenticated_userid
 
+from pyramid_beaker import session_factory_from_settings
 
 from mongoengine import connect, ValidationError
 
@@ -31,6 +32,8 @@ def main(global_config, **settings):
         authentication_policy=AuthenticationPolicy('seekrit'),
         authorization_policy=ACLAuthorizationPolicy(),
     )
+    # sessions
+    config.set_session_factory(session_factory_from_settings(settings))
 
     # auth/auth
     config.set_request_property(get_user, 'user', reify=True)
