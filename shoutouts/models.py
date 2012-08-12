@@ -1,5 +1,8 @@
 import datetime
 
+from pyramid.security import Allow
+from pyramid.authentication import Authenticated
+
 from mongoengine import (
     Document,
     StringField,
@@ -10,6 +13,17 @@ from mongoengine import (
 )
 
 from mongoengine.queryset import QuerySet
+
+class Root(object):
+    """
+    Root authentication object
+    """
+
+    __acl__ = [(Allow, Authenticated, 'view')]
+
+    def __init__(self, request):
+        pass
+
 
 class UserQuerySet(QuerySet):
 

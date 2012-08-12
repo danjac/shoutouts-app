@@ -1,43 +1,12 @@
 from pyramid.config import Configurator
-
-from pyramid.security import (
-    unauthenticated_userid,
-    Allow,
-    Deny,
-)
-
-from pyramid.authentication import (
-    AuthTktAuthenticationPolicy, 
-    Everyone, 
-    Authenticated
-)
-
 from pyramid.authorization import ACLAuthorizationPolicy
+from pyramid.security import unauthenticated_userid
+
 
 from mongoengine import connect, ValidationError
 
-from .models import User
-
-
-class Root(object):
-
-    __acl__ = [(Allow, Authenticated, 'view')]
-
-    def __init__(self, request):
-        pass
-
-
-class AuthenticationPolicy(AuthTktAuthenticationPolicy):
-
-    def effective_principals(self, request):
-
-        principals = [Everyone]
-
-        if request.user:
-            principals.append(Authenticated)
-
-        return principals
-
+from .models import User, Root
+from .auth import AuthenticationPolicy
 
 def get_user(request):
 
@@ -48,6 +17,7 @@ def get_user(request):
             return User.objects.with_id(user_id)
         except ValidationError: # not a valid ObjectId
             pass
+
 
     
 def main(global_config, **settings):
