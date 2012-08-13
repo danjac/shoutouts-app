@@ -1,4 +1,6 @@
 import datetime
+import random
+import string
 
 from pyramid.security import Allow
 from pyramid.authentication import Authenticated
@@ -18,6 +20,13 @@ from mongoengine.queryset import QuerySet
 
 _password_manager = BCRYPTPasswordManager()
 
+def create_register_key(size=30):
+    """
+    Create a random registration key
+    """
+    s = string.ascii_letters + string.digits
+    return "".join(random.choice(s) for i in xrange(size))
+
 class Root(object):
     """
     Root authentication object
@@ -33,7 +42,7 @@ class UserQuerySet(QuerySet):
 
     def authenticate(self, email, password):
         
-        user = User.objects.filter(email=email).first()
+        user = User.objects.filter(email=email, is_active=True).first()
         if user and user.check_password(password):
             return user
                
@@ -47,6 +56,9 @@ class User(Document):
     last_name = StringField(required=True)
 
     joined_on = DateTimeField(default=datetime.datetime.utcnow)
+
+    is_active = BooleanField(default=False)
+    register_key = StringField(unique=True, default=create_register_key)
 
     meta = {'queryset_class' : UserQuerySet}
 

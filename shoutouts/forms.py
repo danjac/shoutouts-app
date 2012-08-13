@@ -17,10 +17,24 @@ from .models import User
 
 class Form(SecureForm):
 
-   def generate_csrf_token(self, csrf_context):
-        return csrf_context.session.get_csrf_token()
+    def __init__(self, request, *args, **kwargs):
 
+        self.request = request
+        self.is_post = self.request.method == "POST"
+        
+        formdata = self.request.POST if self.is_post else None
+    
+        super(Form, self).__init__(formdata, *args, **kwargs)
 
+    def validate(self):
+        if not self.is_post:
+            return False
+        return super(Form).validate()
+
+    def generate_csrf_token(self, csrf_context):
+        return self.request.session.get_csrf_token()
+
+   
 class QuerySetSelectField(fields.SelectFieldBase):
     widget = widgets.Select()
 
