@@ -12,6 +12,9 @@ def includeme(config):
     config.add_route('signup_done', '/signup/done/')
     config.add_route('confirm_signup', '/signup/confirm/')
 
+    config.add_route('change_pass', '/changepass/')
+    config.add_route('recover_pass', '/recoverpass/')
+
     config.add_route('submit', '/submit/')
 
 

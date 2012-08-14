@@ -9,10 +9,12 @@ from cryptacular.bcrypt import BCRYPTPasswordManager
 
 from mongoengine import (
     Document,
+    EmbeddedDocument,
     StringField,
     BooleanField,
     DateTimeField,
     ReferenceField,
+    ObjectIdField,
     ListField,
 )
 
@@ -47,7 +49,14 @@ class UserQuerySet(QuerySet):
             return user
                
 
+class Team(Document):
+    name = StringField(unique=True, required=True)
+    members = ListField(ObjectIdField)
+
+
 class User(Document):
+
+    team = ReferenceField(Team)
 
     email = StringField(unique=True, required=True)
     password = StringField()
@@ -76,22 +85,91 @@ class User(Document):
         return _password_manager.check(self.password, password)
 
 
-class Priorities(Document):
+class Shoutout(EmbeddedDocument):
+
+    user = ReferenceField(User)
+    team = ReferenceField(Team)
+    reason = StringField(required=True)
+
+
+class UserReport(Document):
+    """
+    Weekly report created by an individual user.
+
+    This will contain the same info for everybody.
+    """
 
     owner = ReferenceField(User)
+    last_editor = ReferenceField(User)
 
-    shoutout = ReferenceField(User)
-    shoutout_reason = StringField()
-
-    one_pc = ReferenceField(User)
-    one_pc_reason = StringField()
+    shoutouts = ListField(Shoutout)
+    one_percents = ListField(Shoutout)
 
     lessons_learned = ListField(StringField())
     tasks = ListField(StringField())
     accomplishments = ListField(StringField())
 
     created_on = DateTimeField(default=datetime.datetime.utcnow)
+    updated_on = DateTimeField(default=datetime.datetime.utcnow)
 
     is_complete = BooleanField(default=False)
 
-    
+
+class TeamReportField(EmbeddedDocument):
+    """
+    An individual field for a TeamReportForm.
+
+    For now, we'll just use plain text fields.
+    """
+
+    name = StringField()
+    title = StringField()
+    required = BooleanField(default=False)
+
+
+class TeamReportForm(Document):
+
+    """
+    Team reports vary per team, with different fields. This
+    contains a "template" for keeping all that metadata
+    together.
+    """
+
+    name = StringField(unique=True)
+    title = StringField(unique=True)
+
+    team = ReferenceField(Team, required=False)
+
+    fields = ListField(TeamReportField)
+
+
+class TeamReportItem(EmbeddedDocument):
+    """
+    Individual piece of data for a weekly team report.
+    """
+
+    name = StringField()
+    title = StringField()
+    value = StringField()
+
+class TeamReport(Document):
+    """
+    Weekly team report. Contains at minimum comments, 
+    but also has a set of specific fields determined 
+    by its form.
+    """
+
+    last_editor = ReferenceField(User)
+    form = ReferenceField(TeamReportForm)
+    team = ReferenceField(Team)
+
+    # free field
+    comments = StringField()
+
+    created_on = DateTimeField(default=datetime.datetime.utcnow)
+    updated_on = DateTimeField(default=datetime.datetime.utcnow)
+
+    is_complete = BooleanField(default=False)
+
+    items = ListField(TeamReportItem) 
+

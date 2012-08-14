@@ -15,6 +15,7 @@ from wtforms.ext.csrf import SecureForm
 
 from .models import User
 
+
 class Form(SecureForm):
 
     def __init__(self, request, *args, **kwargs):
@@ -29,7 +30,8 @@ class Form(SecureForm):
     def validate(self):
         if not self.is_post:
             return False
-        return super(Form).validate()
+
+        return super(Form, self).validate()
 
     def generate_csrf_token(self, csrf_context):
         return self.request.session.get_csrf_token()
@@ -89,9 +91,10 @@ class ModelSelectField(QuerySetSelectField):
                 label, validators, queryset=model.objects, **kwargs)
 
 
-class PrioritiesForm(Form):
+
+class UserReportForm(Form):
     """
-    The weekly priorities form
+    The weekly priorities form for users
     """
 
     shoutout = ModelSelectField(model=User, allow_blank=True)
