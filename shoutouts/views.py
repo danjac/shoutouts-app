@@ -1,3 +1,5 @@
+import datetime
+
 from pyramid.view import view_config, forbidden_view_config
 from pyramid.security import NO_PERMISSION_REQUIRED, remember, forget
 from pyramid.renderers import render
@@ -26,33 +28,20 @@ def handle_forbidden(request):
 @view_config(route_name='main', 
              renderer='index.jinja2')
 def main(request):
-    """
-    Main view of application.
 
-    We want to include here:
+    year, week, _ = datetime.date.today().isocalendar()
 
-    - priorities form (user's own priorities)
-    - accounts form
-    - sales form
-    etc.
+    user_report, _ = UserReport.objects.get_or_create(
+        owner=request.user,
+        week=week,
+        year=year,
+    )
 
-    By default, should show forms for current week. If
-    the week is "locked" then shows a read-only version
-    of the form(s). Also locked if the user does not have
-    permission to edit that particular form.
-
-    All users can edit their own priorities if the week is
-    not yet locked. They can also edit priorities of other
-    team members. Only sales people can edit the sales form (and
-    so on).
-    """
-
-    user_report = UserReport()
-
-    user_report_form = UserReportForm(obj=user_report)
+    user_report_form = UserReportForm(request, obj=user_report)
 
     return {
-            'user_report_form' : user_report_form, 
+            'form' : user_report_form, 
+            'report' : user_report,
             }
 
 
@@ -158,6 +147,7 @@ def confirm_signup(request):
     headers = remember(request, str(user.id))
     return HTTPFound(request.route_url('main'), headers=headers)
 
+
 @view_config(route_name="recover_pass",
              permission=NO_PERMISSION_REQUIRED,
              renderer="recover_pass.jinja2")
@@ -171,6 +161,7 @@ def recover_password(request):
             emails.send_recover_password(request, user)
             return HTTPFound(request.route_url("recover_pass_done"))
     return {'form' : form}
+
 
 @view_config(route_name="change_pass",
              permission=NO_PERMISSION_REQUIRED,
@@ -204,33 +195,27 @@ def change_password(request):
 
 
 
-@view_config(route_name='submit',
+
+@view_config(route_name='edit',
              renderer='json',
              request_method='POST',
              xhr=True)
-def submit(request):
+def edit(report, request):
 
     # check if locked
-    form = PrioritiesForm(request)
+    form = UserReportForm(request, obj=report)
     is_valid = form.validate()
 
-    if is_valid:
-        
-        priorities = Priorities(
-            owner=request.user,
-            is_complete=bool(form.complete.data),
-        )
-        
-        form.populate_obj(priorities)
-
-        print priorities.tasks
-        print priorities.one_pc
-        print priorities.owner
-        # priorities.save()
+    if not is_valid:
+        print form.errors
 
     # re-render the form partial
-    html = render('priorities_form.jinja2', {'form' : form}, request)
 
+    html = render('user_report_form.jinja2', {
+                  'form' : form, 
+                  'report' : report}, request)
+
+    
     return {'success' : is_valid, 'html' : html}
 
 

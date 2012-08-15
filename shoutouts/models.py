@@ -8,9 +8,11 @@ from pyramid.authentication import Authenticated
 from cryptacular.bcrypt import BCRYPTPasswordManager
 
 from mongoengine import (
+    connect,
     Document,
     EmbeddedDocument,
     StringField,
+    IntField,
     BooleanField,
     DateTimeField,
     ReferenceField,
@@ -22,6 +24,14 @@ from mongoengine.queryset import QuerySet
 
 _password_manager = BCRYPTPasswordManager()
 
+
+def includeme(config):
+
+    settings = config.get_settings()
+    connect(settings['db_name'])
+
+
+
 def create_register_key(size=30):
     """
     Create a random registration key
@@ -29,15 +39,7 @@ def create_register_key(size=30):
     s = string.ascii_letters + string.digits
     return "".join(random.choice(s) for i in xrange(size))
 
-class Root(object):
-    """
-    Root authentication object
-    """
 
-    __acl__ = [(Allow, Authenticated, 'view')]
-
-    def __init__(self, request):
-        pass
 
 
 class UserQuerySet(QuerySet):
@@ -109,10 +111,18 @@ class UserReport(Document):
     tasks = ListField(StringField())
     accomplishments = ListField(StringField())
 
+    week = IntField()
+    year = IntField()
+
     created_on = DateTimeField(default=datetime.datetime.utcnow)
     updated_on = DateTimeField(default=datetime.datetime.utcnow)
 
     is_complete = BooleanField(default=False)
+
+    @property
+    def __acl__(self):
+        return [(Allow, Authenticated, "view"),
+                (Allow, Authenticated, "edit")]
 
 
 class TeamReportField(EmbeddedDocument):

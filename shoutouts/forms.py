@@ -4,6 +4,7 @@ from wtforms import (
     PasswordField,
     SelectField,
     SubmitField,
+    FormField,
     FieldList,
     ValidationError,
     validators,
@@ -11,6 +12,7 @@ from wtforms import (
     fields,
 )
 
+from wtforms import Form as BaseForm
 from wtforms.ext.csrf import SecureForm
 
 from .models import User
@@ -92,24 +94,26 @@ class ModelSelectField(QuerySetSelectField):
 
 
 
-class UserReportForm(Form):
-    """
-    The weekly priorities form for users
-    """
+class ShoutoutForm(BaseForm):
 
-    shoutout = ModelSelectField(model=User, allow_blank=True)
+    user = ModelSelectField(model=User, allow_blank=True)
 
-    shoutout_reason = TextField(
+    reason = TextField(
         validators=(
             validators.Required(),
         ),
     )
 
-    one_pc = ModelSelectField(model=User, allow_blank=True)
+            
+class UserReportForm(Form):
+    """
+    The weekly priorities form for users
+    """
 
-    one_pc_reason = TextField()
+    shoutouts = FieldList(FormField(ShoutoutForm), min_entries=1)
 
-    lessons_learned = TextField()
+    lessons_learned = FieldList(TextField(), min_entries=3)
+
     tasks = FieldList(TextField(), min_entries=3)
 
     complete = SubmitField("I'm done")

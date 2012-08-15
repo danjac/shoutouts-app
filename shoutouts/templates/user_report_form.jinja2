@@ -1,0 +1,29 @@
+<form method="POST" id="submit-form" action="{{ request.route_url('edit', id=report.id) }}">
+    {{ form.csrf_token }}
+
+    {% for shoutout in form.shoutouts %}
+    <div>
+        Shoutout to {{ shoutout.user }} for {{ shoutout.reason }}
+    </div>
+    {% endfor %}
+
+   <label>Lessons Learned</label>
+   <ol>
+        {% for lesson in form.lessons_learned %}
+        <li>{{ lesson }}</li>
+        {% endfor %}
+   </ol>
+
+
+
+   <label>Tasks</label>
+   <ol>
+        {% for task in form.tasks %}
+        <li>{{ task }}</li>
+        {% endfor %}
+   </ol>
+
+   {{ form.complete(class="btn") }}
+   {{ form.postpone(class="btn") }}
+
+</form>
